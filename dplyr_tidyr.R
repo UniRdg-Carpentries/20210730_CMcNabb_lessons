@@ -45,6 +45,7 @@ View(interviews)
 #Selecting columns and filtering rows
 #######
 #Basically like subsetting!
+interviews[interviews$village == "God",]
 
 #The select() function:
 ?select()
@@ -116,7 +117,7 @@ output_a <- function1(input,arguments1)
 output_b <- function2(output_a,arguments2)
 
 #we can use:
-output <-  input %>% 
+output_b <-  input %>% 
   function1(arguments) %>% 
   function2(arguments)
 
@@ -134,15 +135,19 @@ output <-  input %>%
 interviews2 <- filter(interviews, village == "Chirodzo")
 interviews_ch <- select(interviews2, village:respondent_wall_type)
 
-# interviews_ch <- interviews %>%
-#   filter(village == "Chirodzo") %>%
-#   select(village:respondent_wall_type)
+interviews_ch <- interviews %>%
+   filter(village == "Chirodzo") %>%
+   select(village:respondent_wall_type)
 
 # CHALLENGE - Using pipes, subset the interviews data to include 
 # interviews where respondents were members of an irrigation 
 # association (memb_assoc) and retain only the columns 
 # affect_conflicts, liv_count, and no_meals.
 
+interviews_filtered <- interviews %>%
+  filter(memb_assoc == "yes") %>%
+  select(affect_conflicts, liv_count, no_meals)
+interviews_filtered
 
 ##########
 #MUTATE
@@ -150,9 +155,9 @@ interviews_ch <- select(interviews2, village:respondent_wall_type)
 ?mutate()
 
 #let's say we want to add a variable to our interviews
-#dataframe telling us the ration of number of household 
+#dataframe telling us the ratio of number of household 
 #members to rooms used for sleeping
-
+# mutate(interviews,people_per_room = no_membrs / rooms)
 interviews <- interviews %>%
   mutate(people_per_room = no_membrs / rooms)
 #equivalent to:
@@ -164,7 +169,7 @@ interviews$people_per_room <- interviews$no_membrs/interviews$rooms
 #members to rooms
 
 irrigation <- interviews %>%
-  filter(!is.na(memb_assoc)) %>%
+  filter(!is.na(memb_assoc)) %>% 
   mutate(people_per_room = no_membrs / rooms)
 View(irrigation)
 
@@ -173,12 +178,17 @@ View(irrigation)
 #the village column and a new column called total_meals 
 #containing a value that is equal to the total number of 
 #meals served in the household per day on average 
-#(no_membrs times no_meals). Only the rows where 
+#(no_membrs * no_meals). Only the rows where 
 #total_meals is greater than 20 should be shown in the 
 #final dataframe.
 
 #Hint: think about how the commands should be ordered to 
 #produce this data frame!
+
+interviews_ch <- interviews %>%
+  mutate(total_meals = no_meals * no_membrs) %>%
+  filter(total_meals > 20) %>%
+  select(village, total_meals) 
 
 ##########
 #Split-apply-combine and summarize()
@@ -198,9 +208,9 @@ interviews %>%
 interviews %>%
   group_by(village, memb_assoc) %>% #here we specify groups by 
   #village & member_assoc
-  summarize(mean_no_membrs = mean(no_membrs))#and then get the 
+  summarize(mean_no_membrs = mean(no_membrs)) %>% #and then get the 
   #mean for each subgroup
-
+  ungroup()
 #we can ungroup the tibble by using ungroup()
 
 #we have some people that didn't specify if they were part of
@@ -231,6 +241,7 @@ interviews %>%
 #CHALLENGE - How many households in the survey have an average of 
 #two meals per day? Three meals per day? Are there any other numbers 
 #of meals represented?
+interviews %>%   count(no_meals)
 # Use group_by() and summarize() to find the mean, min, and max 
 # number of household members for each village. Also add the number 
 # of observations (hint: see ?n).
@@ -245,7 +256,7 @@ interviews %>%
 # 3. Each value must have its own cell
 # But we may want to move our data round depending on the type of 
 # analysis we want to run.
-View(interviews)
+#View(interviews)
 
 # Wide and long data formats
 my_wide_data <- as.data.frame(list(x=c(10,15,20), 
@@ -256,11 +267,11 @@ print(my_wide_data)
 
 #wide data is easy for us humans to read but not so much for computers
 #Computers prefer long data formats
-
+?pivot_longer
 my_long_data <- pivot_longer(my_wide_data, cols = y1:y3, 
                              names_to = "Variable", 
                              values_to = "Response")
-my_long_data$Variable <- as.factor(my_long_data$Variable)
+#my_long_data$Variable <- as.factor(my_long_data$Variable)
 print(my_long_data)
 
 #every now and then, R might want your data in wide format

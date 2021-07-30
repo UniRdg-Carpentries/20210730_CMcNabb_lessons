@@ -18,28 +18,30 @@
 #WHAT IS A FUNCTION?
 ##########
 
-function(input){
-  output <- SomeCommandUsingOur(input)
+function(input_argument){
+  output <- SomeCommandUsingOur(input_argument)
   return(output)
 }
 #N.B. we can have more than one input argument and
-#more than one output
-#the return part is not essential but it cleaner
+#more than one output (but only if it is stored in a list)
+#the return part is not essential but is cleaner
+#ALSO: WHAT HAPPENS IN A FUNCTION, STAYS IN A FUNCTION
 
 ##########
 #DEFINING A FUNCTION
 ##########
 #First let's make a directory called functions
+#And create a new script called functions-lesson.R
 
 #Define a function to convert temperature 
 #from Fahrenheit to Kelvin:
-# fahr_to_kelvin <- function(temp) {
-#   kelvin <- ((temp - 32) * (5 / 9)) + 273.15
-#   return(kelvin)
-# }
+fahr_to_kelvin <- function(temp) {
+  kelvin <- ((temp - 32) * (5 / 9)) + 273.15
+  return(kelvin)
+ }
 
 #let's test our function:
-#fahr_to_kelvin(temp)
+fahr_to_kelvin(350)
 
 #CHALLENGE - Write a function called kelvin_to_celsius()
 #that takes a temperature in Kelvin and returns that 
@@ -47,11 +49,14 @@ function(input){
 #Hint: To convert from Kelvin to Celsius you 
 #subtract 273.15
 
-#kelvin_to_celsius <- 
+kelvin_to_celsius <- function(temp){
+  celsius <- temp - 273.15
+  return(celsius)
+}
 
 #did it work? what is 0 degrees Kelvin in Celcius?
-kelvin_to_celcius()
-# kelvin_to_celsius(temp = )
+kelvin_to_celsius(0)
+kelvin_to_celsius(temp = 0)
 
 ##########
 #COMBINING FUNCTIONS
@@ -68,10 +73,14 @@ kelvin_to_celsius <- function(temp) {
 
 #CHALLENGE - Write a function to convert Fehrenheit to 
 #Celcius 
-
+fahr_to_celsius <- function(temp_in_F){
+  temp_in_K <- fahr_to_kelvin(temp_in_F)
+  temp_in_C <- kelvin_to_celsius(temp_in_K)
+  return(temp_in_C)
+}
 
 #Let's make some cookies!
-fahr_to_celsius(temp = 100)
+fahr_to_celsius(temp = 350)
 
 
 ###############
@@ -85,6 +94,15 @@ fahr_to_celsius(temp = 100)
 fahr_to_kelvin(c("30"))
 
 fahr_to_kelvin <- function(temp) {
+  if(!is.numeric(temp)){
+    stop("you're an idiot, use a numeric value for temp")
+  }
+  kelvin <- ((temp - 32) * (5 / 9)) + 273.15
+  return(kelvin)
+}
+
+fahr_to_kelvin <- function(temp) {
+  stopifnot(is.numeric(temp))
   kelvin <- ((temp - 32) * (5 / 9)) + 273.15
   return(kelvin)
 }
@@ -95,6 +113,10 @@ fahr_to_kelvin <- function(temp) {
 #inappropriately.
 
 fahr_to_celsius <- function(temp) {
+  # if(!is.numeric(temp)){ # Long version
+  # stop("nope, use a numeric value for temp")
+  # }
+  stopifnot(is.numeric(temp))
   temp_k <- fahr_to_kelvin(temp)
   result <- kelvin_to_celsius(temp_k)
   return(result)
@@ -114,7 +136,7 @@ View(gapminder)
 
 #Define a function that calculates the 
 #Gross Domestic Product of a nation
-#i.e. Takes a dataset and multiply the population 
+#i.e. Take a dataset and multiply the population 
 #column with the GDP per capita column.
 calcGDP <- function(dat) {
   gdp <- dat$pop * dat$gdpPercap
@@ -144,24 +166,38 @@ calcGDP <- function(dat, year=NULL, country=NULL) {
   gdp <- dat$pop * dat$gdpPercap
   # a new dataframe that concatenates the subsetted
   #gapminder data (dat) with the new gdp vector
-  new <- cbind(dat, gdp=gdp)
+  new <- cbind(dat, gdp = gdp)
   #return this output
   return(new)
 }
 
+#we would normally write our functions in a 
+#separate file and use "source()" to load them
+source("functions/functions-lesson.R")
+
+#let's try out our newest function - calcGDP()
 calcGDP(dat = gapminder, country = "New Zealand")
 calcGDP(dat = gapminder, year = 2002, country = "New Zealand")
 
 # CHALLENGE - Test out your GDP function by calculating
 # the GDP for New Zealand in 1987. 
 # How does this differ from New Zealand’s GDP in 1952?
+calcGDP(dat = gapminder, year = c(1987, 1952), country = "New Zealand")
 
-# CHALLENGE - Write a function called fence() that 
+# OPTIONAL CHALLENGE - Write a function called fence() that 
 # takes two vectors as arguments, called text and 
 #wrapper, and prints out the text wrapped with the 
 #wrapper:
+fence <- function(text, wrapper){
+  text_with_wrapper <- c(wrapper, text, wrapper)
+  output <- paste(text_with_wrapper, collapse = " ")
+  return(output)
+}
 
-#fence(text=best_practice, wrapper="***")
+best_practice <- c("Write", "programs", "for", "people", "not", "computers")
+
+
+fence(text=best_practice, wrapper="***")
 
 ########
 #Documentation to go alongside your functions

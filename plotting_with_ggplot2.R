@@ -29,10 +29,10 @@ library(ggplot2)
 # https://github.com/rstudio/cheatsheets/blob/master/data-visualization-2.1.pdf
 
 #The basic formula
-# ggplot(data = your_data, 
-#        mapping = aes(x=independent_variable,
-#                      y=dependent_variable)) +
-#   geom_something()
+ggplot(data = your_data, 
+       mapping = aes(x=independent_variable,
+                     y=dependent_variable)) +
+  geom_something()
 
 #let's try it:
 ggplot(data = gapminder, 
@@ -45,7 +45,7 @@ ggplot(data = gapminder,
 # CHALLENGE - Modify the example so that the figure shows how life 
 # expectancy has changed over time:
 ggplot(data = gapminder, 
-       mapping = aes(x = gdpPercap, 
+       mapping = aes(x = year, 
                      y = lifeExp)) + 
   geom_point()
 
@@ -57,6 +57,12 @@ ggplot(data = gapminder,
 # to color the points by the “continent” column. What 
 # trends do you see in the data? Are they what you 
 # expected?
+
+ggplot(data = gapminder, 
+       mapping = aes(x = year, 
+                     y = lifeExp,
+                     colour = continent)) + 
+  geom_point()
 
 #########
 #LAYERS
@@ -73,7 +79,7 @@ ggplot(data = gapminder,
                      #tells ggplot to draw a line for each country
                      color=continent)) + # colour the data by continent
   geom_line() #draw the data as a line
-  # geom_smooth()
+
 
 #we can also layer these on top of one another (e.g. points and lines)
 ggplot(data = gapminder, 
@@ -83,14 +89,15 @@ ggplot(data = gapminder,
                      #tells ggplot to draw a line for each country
                      color=continent)) + # colour the data by continent
   geom_line() + #draw the data as a line
-  geom_point()
+  geom_point() #also add points to my graph
 
 #maybe we want to make our lines different colours but we want our points 
 #to stay black... to do this, we can apply aes within our layers:
 ggplot(data = gapminder, 
        mapping = aes(x=year, 
                      y=lifeExp, 
-                     by=country)) + #notice we've removed colour from our aes
+                     by=country
+                     )) + #notice we've removed colour from our aes
   geom_line(mapping = aes(color=continent)) + #and we've added it to geom_line
   geom_point() #but there is nothing assigning colour to the points
 
@@ -100,7 +107,7 @@ ggplot(data = gapminder,
                      y=lifeExp, 
                      by=country)) + #notice we've removed colour from our aes
   geom_line(mapping = aes(color=continent)) + #and we've added it to geom_line
-  geom_point(colour = "blue") #but there is nothing assigning colour to the points
+  geom_point(colour = "navyblue") #but there is nothing assigning colour to the points
 
 #ggplot can take colour arguments as character vectors (e.g. "darkblue") as well
 #as hex code (e.g. #001E6C)
@@ -126,7 +133,7 @@ ggplot(gapminder,
 #Let's say we want to display the log of our data instead
 ggplot(gapminder, 
        aes(gdpPercap, lifeExp)) +
-  geom_point(alpha = 0.5) + 
+  geom_point(alpha = 0.2) + 
   scale_x_log10()
 #we saw how geom_smooth() added a smooth line and standard error
 #let's add it again here:
@@ -141,7 +148,9 @@ ggplot(gapminder,
 # Hint: do not use the aes function.
 ggplot(gapminder, 
        aes(gdpPercap, lifeExp)) +
-  geom_point() + 
+  geom_point(alpha = 0.5,
+             size = 4, 
+             colour="magenta") + 
   scale_x_log10() +
   geom_smooth(method = "lm", size=1.5)
 
@@ -150,7 +159,8 @@ ggplot(gapminder,
 #Hint: The color argument can be used inside the aesthetic.
 ggplot(gapminder, 
        aes(gdpPercap, lifeExp)) +
-  geom_point() + 
+  geom_point(shape = 21,
+             colour = "green") + 
   scale_x_log10() +
   geom_smooth(method = "lm", size=1.5)
 
@@ -161,6 +171,7 @@ ggplot(gapminder,
 #Let's also choose the colours ourselves using a fancy
 #colour palette
 library(viridis)
+?viridis
 our_palette <- viridis(5)
 
 ggplot(gapminder, 
@@ -178,12 +189,11 @@ ggplot(gapminder,
 #What if we want a different plot for each country?
 #For this we can use facet_wrap()
 americas <- gapminder[gapminder$continent == "Americas",]
-ggplot(data = americas, 
+americas %>% ggplot( 
        mapping = aes(x = year, y = lifeExp)) +
   geom_line() +
   facet_wrap( ~ country) +
-  theme(axis.text.x = element_text(angle = 45)) +
-  theme_classic()
+  theme(axis.text.x = element_text(angle = 90)) 
 #The facet_wrap layer took a “formula” as its argument, 
 #denoted by the tilde (~). This tells R to draw a panel 
 #for each unique value in the country column of the 
@@ -199,7 +209,8 @@ asia_and_oceania <- gapminder[
     gapminder$continent == "Oceania",]
 
 #plot our data for Asia and Oceania
-ggplot(data = asia_and_oceania, 
+life_exp_plot <- 
+  ggplot(data = asia_and_oceania, 
        mapping = aes(x = year, 
                      y = lifeExp, 
                      color=continent)) +
@@ -210,9 +221,25 @@ ggplot(data = asia_and_oceania,
     y = "Life expectancy",   # y axis title
     title = "Life expectancy by country",      # main title of figure
     color = "Continent"      # title of legend
-  ) +
+  ) 
+
+life_exp_plot <- life_exp_plot +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
+#save our plot
+ggsave(filename = "graphs/lifeExp.png", 
+       plot = life_exp_plot, 
+       width = 12, 
+       height = 10, 
+       dpi = 300, 
+       units = "cm")
 
 #GGPLOT CAN DO SO SO MUCH MORE! THIS IS JUST THE BEGINNING
+#Dan Brady's bumber list of ggplot resources:
+# R graph gallery: https://www.r-graph-gallery.com/
+# ggplot2tor: https://ggplot2tor.com/
+# data visualisation course: https://datavizs21.classes.andrewheiss.com/content/
+# A ggplot2 tutorial for beautiful plotting: https://www.cedricscherer.com/2019/08/05/a-ggplot2-tutorial-for-beautiful-plotting-in-r/
+# R graphics cookbook: https://r-graphics.org/
+# ggplot2 online book: https://ggplot2-book.org/
